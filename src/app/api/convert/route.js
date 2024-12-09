@@ -21,14 +21,15 @@ export async function POST(request) {
 
     const inputFilename = `input_${Date.now()}.${image.name.split('.').pop()}`;
     const inputPath = path.join(uploadsDir, inputFilename);
-    const outputPath = path.join(uploadsDir, `output_${Date.now()}.txt`);
+    const outputTextPath = path.join(uploadsDir, `output_${Date.now()}.txt`);
+    const outputPngPath = path.join(uploadsDir, `output_${Date.now()}.png`);
 
     const bytes = await image.arrayBuffer();
     const buffer = Buffer.from(bytes);
     fs.writeFileSync(inputPath, buffer);
 
     return new Promise((resolve, reject) => {
-      exec(`./public/converter/ascii_converter ${inputPath} ${outputPath} ${width} ${height}`,
+      exec(`./public/converter/ascii_converter ${inputPath} ${outputTextPath} ${width} ${height} ${outputPngPath}`,
         (error, stdout, stderr) => {
           if (error) {
             console.error('Execution error:', error);
@@ -36,12 +37,18 @@ export async function POST(request) {
           }
 
           try {
-            const asciiArt = fs.readFileSync(outputPath, 'utf8');
+            const asciiArt = fs.readFileSync(outputTextPath, 'utf8');
+            const pngBuffer = fs.readFileSync(outputPngPath);
+            const base64Png = pngBuffer.toString('base64');
 
             fs.unlinkSync(inputPath);
-            fs.unlinkSync(outputPath);
+            fs.unlinkSync(outputTextPath);
+            fs.unlinkSync(outputPngPath);
 
-            resolve(NextResponse.json({ asciiArt }));
+            resolve(NextResponse.json({
+              asciiArt,
+              pngDataUrl: `data:image/png;base64,${base64Png}`
+            }));
           } catch (readError) {
             console.error('File read error:', readError);
             resolve(NextResponse.json({ error: 'Failed to read output' }, { status: 500 }));

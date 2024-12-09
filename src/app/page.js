@@ -128,24 +128,48 @@ export default function Home() {
         </div>
 
         {asciiArt && (
-          <div className="bg-[#121212] rounded-xl shadow-2xl overflow-hidden">
-            <div className="p-4 bg-[#121212]">
-              <h2 className="text-xl font-semibold text-white">Generated ASCII Art</h2>
-            </div>
-            <pre
-              className="p-4 text-xs whitespace-pre overflow-x-auto font-mono text-white bg-[#121212] max-h-[600px]"
-              style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(55,65,81,1) rgba(17,24,39,1)' }}
-            >
-              {asciiArt}
-            </pre>
-            <div className="flex justify-center p-4">
-              <button
-                onClick={handleCopy}
-                className="flex items-center bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="bg-[#121212] rounded-xl shadow-2xl overflow-hidden">
+              <div className="p-4 bg-[#121212]">
+                <h2 className="text-xl font-semibold text-white">Generated ASCII Art (Text)</h2>
+              </div>
+              <pre
+                className="p-4 text-xs whitespace-pre overflow-x-auto font-mono text-white bg-[#121212] max-h-[600px]"
+                style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(55,65,81,1) rgba(17,24,39,1)' }}
               >
-                <Copy className="mr-2" />
-                Copy ASCII Art
-              </button>
+                {asciiArt}
+              </pre>
+              <div className="flex justify-center p-4">
+                <button
+                  onClick={handleCopy}
+                  className="flex items-center bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
+                >
+                  <Copy className="mr-2" />
+                  Copy ASCII Art
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-[#121212] rounded-xl shadow-2xl overflow-hidden">
+              <div className="p-4 bg-[#121212]">
+                <h2 className="text-xl font-semibold text-white">Generated ASCII Art (PNG)</h2>
+              </div>
+              <div className="flex justify-center p-4">
+                <img
+                  src={asciiPng}
+                  alt="ASCII Art PNG"
+                  className="max-w-full max-h-[500px] object-contain"
+                />
+              </div>
+              <div className="flex justify-center p-4">
+                <button
+                  onClick={handleDownloadPng}
+                  className="flex items-center bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+                >
+                  <Image className="mr-2" />
+                  Download PNG
+                </button>
+              </div>
             </div>
           </div>
         )}
