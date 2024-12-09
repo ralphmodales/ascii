@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Copy, Upload, Wand2 } from 'lucide-react';
 
 export default function Home() {
   const [file, setFile] = useState(null);
@@ -10,7 +11,8 @@ export default function Home() {
   const [height, setHeight] = useState(100);
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
   };
 
   const handleSubmit = async (e) => {
@@ -48,73 +50,106 @@ export default function Home() {
   };
 
   return (
-    <main className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-center">
-        Image to ASCII Art Converter
-      </h1>
+    <div className="min-h-screen bg-black text-white py-8">
+      <div className="container mx-auto max-w-4xl px-4">
+        <h1 className="text-4xl font-extrabold mb-8 text-center text-white">
+          Image to ASCII Art Converter
+        </h1>
 
-      <form onSubmit={handleSubmit} className="mb-6">
-        <div className="flex flex-col items-center space-y-4">
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="w-full max-w-md"
-          />
+        <div className="bg-[#212121] rounded-xl shadow-2xl p-6 mb-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-full max-w-md">
+                <label
+                  htmlFor="file-upload"
+                  className="flex items-center justify-center w-full p-4 border-2 border-dashed border-gray-500 rounded-lg cursor-pointer hover:bg-black transition"
+                >
+                  <Upload className="mr-2 text-white" />
+                  <span className="text-white">
+                    {file ? file.name : 'Choose an image to convert'}
+                  </span>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
+              </div>
 
-          <div className="flex space-x-4">
-            <div className="flex flex-col">
-              <label htmlFor="width" className="mb-2">Width (1-1000):</label>
-              <input
-                type="number"
-                id="width"
-                min="1"
-                max="1000"
-                value={width}
-                onChange={(e) => setWidth(parseInt(e.target.value))}
-                className="border rounded bg-white text-black p-2 w-24"
-              />
+              <div className="flex space-x-4">
+                <div className="flex flex-col">
+                  <label htmlFor="width" className="mb-2 text-white">Width (1-1000):</label>
+                  <input
+                    type="number"
+                    id="width"
+                    min="1"
+                    max="1000"
+                    value={width}
+                    onChange={(e) => setWidth(parseInt(e.target.value))}
+                    className="border border-black rounded bg-[#121212] text-white p-2 w-24 focus:ring-2 focus:ring-black"
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label htmlFor="height" className="mb-2 text-gray-300">Height (1-1000):</label>
+                  <input
+                    type="number"
+                    id="height"
+                    min="1"
+                    max="1000"
+                    value={height}
+                    onChange={(e) => setHeight(parseInt(e.target.value))}
+                    className="border border-black rounded bg-[#121212] text-white p-2 w-24 focus:ring-2 focus:ring-black"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={!file || isLoading}
+                className="flex items-center justify-center bg-black text-white px-6 py-2 rounded hover:bg-white hover:text-black disabled:bg-[#212121] transition"
+              >
+                {isLoading ? (
+                  <>
+                    <Wand2 className="mr-2 animate-spin" />
+                    Converting...
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="mr-2" />
+                    Convert to ASCII
+                  </>
+                )}
+              </button>
             </div>
-
-            <div className="flex flex-col">
-              <label htmlFor="height" className="mb-2">Height (1-1000):</label>
-              <input
-                type="number"
-                id="height"
-                min="1"
-                max="1000"
-                value={height}
-                onChange={(e) => setHeight(parseInt(e.target.value))}
-                className="border rounded bg-white text-black p-2 w-24"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={!file || isLoading}
-            className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
-          >
-            {isLoading ? 'Converting...' : 'Convert to ASCII'}
-          </button>
+          </form>
         </div>
-      </form>
 
-      {asciiArt && (
-        <div className="bg-black text-white rounded">
-          <pre className="text-xs whitespace-pre font-mono">
-            {asciiArt}
-          </pre>
-          <div className="flex justify-center mt-4">
-            <button
-              onClick={handleCopy}
-              className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600"
+        {asciiArt && (
+          <div className="bg-[#121212] rounded-xl shadow-2xl overflow-hidden">
+            <div className="p-4 bg-[#121212]">
+              <h2 className="text-xl font-semibold text-white">Generated ASCII Art</h2>
+            </div>
+            <pre
+              className="p-4 text-xs whitespace-pre overflow-x-auto font-mono text-white bg-[#121212] max-h-[600px]"
+              style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(55,65,81,1) rgba(17,24,39,1)' }}
             >
-              Copy ASCII Art
-            </button>
+              {asciiArt}
+            </pre>
+            <div className="flex justify-center p-4">
+              <button
+                onClick={handleCopy}
+                className="flex items-center bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
+              >
+                <Copy className="mr-2" />
+                Copy ASCII Art
+              </button>
+            </div>
           </div>
-        </div>
-      )}
-    </main>
+        )}
+      </div>
+    </div>
   );
 }
