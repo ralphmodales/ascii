@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { Copy, Upload, Wand2 } from 'lucide-react';
+import { Copy, Upload, Wand2, Image } from 'lucide-react';
 
 export default function Home() {
   const [file, setFile] = useState(null);
   const [asciiArt, setAsciiArt] = useState('');
+  const [asciiPng, setAsciiPng] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [width, setWidth] = useState(100);
   const [height, setHeight] = useState(100);
@@ -37,6 +38,7 @@ export default function Home() {
 
       const result = await response.json();
       setAsciiArt(result.asciiArt);
+      setAsciiPng(result.pngDataUrl);
     } catch (error) {
       console.error('Conversion failed', error);
       alert('Failed to convert image');
@@ -47,6 +49,13 @@ export default function Home() {
   const handleCopy = () => {
     navigator.clipboard.writeText(asciiArt);
     alert('ASCII Art Copied!');
+  };
+
+  const handleDownloadPng = () => {
+    const link = document.createElement('a');
+    link.href = asciiPng;
+    link.download = 'ascii_art.png';
+    link.click();
   };
 
   return (
@@ -153,13 +162,6 @@ export default function Home() {
             <div className="bg-[#121212] rounded-xl shadow-2xl overflow-hidden">
               <div className="p-4 bg-[#121212]">
                 <h2 className="text-xl font-semibold text-white">Generated ASCII Art (PNG)</h2>
-              </div>
-              <div className="flex justify-center p-4">
-                <img
-                  src={asciiPng}
-                  alt="ASCII Art PNG"
-                  className="max-w-full max-h-[500px] object-contain"
-                />
               </div>
               <div className="flex justify-center p-4">
                 <button
