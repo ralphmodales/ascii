@@ -6,8 +6,8 @@
 #include <wand/MagickWand.h>
 
 #define ASCII_CHARS " .:-=+*#%@"
-#define MAX_WIDTH 100
-#define MAX_HEIGHT 50
+#define MAX_WIDTH 200
+#define MAX_HEIGHT 200
 
 int image_to_ascii(const char* input_path, const char* output_path) {
     MagickWand *magick_wand;
