@@ -102,7 +102,7 @@ export default function Home() {
                 </div>
 
                 <div className="flex flex-col">
-                  <label htmlFor="height" className="mb-2 text-gray-300">Height (1-1000):</label>
+                  <label htmlFor="height" className="mb-2 text-white">Height (1-1000):</label>
                   <input
                     type="number"
                     id="height"

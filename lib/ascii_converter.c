@@ -78,7 +78,7 @@ int image_to_ascii(const char* input_path, const char* output_text_path, const c
     PixelSetColor(black, "black");
     PixelSetColor(white, "white");
 
-    MagickNewImage(png_wand, custom_width * 8, custom_height * 16, white);
+    MagickNewImage(png_wand, custom_width, custom_height, white);
     DrawSetFillColor(drawing_wand, black);
     DrawSetFont(drawing_wand, "DejaVu-Sans-Mono");
     DrawSetFontSize(drawing_wand, 12);
