@@ -12,6 +12,8 @@ export async function POST(request) {
 
     const formData = await request.formData();
     const image = formData.get('image');
+    const width = formData.get('width') || 100;
+    const height = formData.get('height') || 100;
 
     if (!image) {
       return NextResponse.json({ error: 'No image uploaded' }, { status: 400 });
@@ -26,7 +28,7 @@ export async function POST(request) {
     fs.writeFileSync(inputPath, buffer);
 
     return new Promise((resolve, reject) => {
-      exec(`./public/converter/ascii_converter ${inputPath} ${outputPath}`, 
+      exec(`./public/converter/ascii_converter ${inputPath} ${outputPath} ${width} ${height}`,
         (error, stdout, stderr) => {
           if (error) {
             console.error('Execution error:', error);

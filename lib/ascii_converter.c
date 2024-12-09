@@ -6,14 +6,22 @@
 #include <wand/MagickWand.h>
 
 #define ASCII_CHARS " .:-=+*#%@"
-#define MAX_WIDTH 200
-#define MAX_HEIGHT 200
+#define DEFAULT_WIDTH 100
+#define DEFAULT_HEIGHT 100
+#define MAX_WIDTH 1000
+#define MAX_HEIGHT 1000
 
-int image_to_ascii(const char* input_path, const char* output_path) {
+int image_to_ascii(const char* input_path, const char* output_path, size_t custom_width, size_t custom_height) {
     MagickWand *magick_wand;
     PixelIterator *iterator;
     PixelWand **pixels;
     FILE *output_file;
+
+    if (custom_width == 0 || custom_height == 0 || 
+        custom_width > MAX_WIDTH || custom_height > MAX_HEIGHT) {
+        custom_width = DEFAULT_WIDTH;
+        custom_height = DEFAULT_HEIGHT;
+    }
 
     MagickWandGenesis();
     magick_wand = NewMagickWand();
@@ -25,12 +33,8 @@ int image_to_ascii(const char* input_path, const char* output_path) {
 
     size_t width = MagickGetImageWidth(magick_wand);
     size_t height = MagickGetImageHeight(magick_wand);
-    double scale = fmin((double)MAX_WIDTH / width, (double)MAX_HEIGHT / height);
     
-    size_t new_width = width * scale;
-    size_t new_height = height * scale;
-    
-    MagickResizeImage(magick_wand, new_width, new_height, LanczosFilter, 1.0);
+    MagickResizeImage(magick_wand, custom_width, custom_height, LanczosFilter, 1.0);
 
     MagickSetImageType(magick_wand, GrayscaleType);
 
@@ -42,7 +46,7 @@ int image_to_ascii(const char* input_path, const char* output_path) {
 
     iterator = NewPixelIterator(magick_wand);
 
-    for (size_t y = 0; y < new_height; y++) {
+    for (size_t y = 0; y < custom_height; y++) {
         size_t row_width;
         pixels = PixelGetNextIteratorRow(iterator, &row_width);
         
@@ -70,11 +74,13 @@ int image_to_ascii(const char* input_path, const char* output_path) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        fprintf(stderr, "Usage: %s <input_image> <output_file>\n", argv[0]);
-        return 1;
+    size_t width = DEFAULT_WIDTH;
+    size_t height = DEFAULT_HEIGHT;
+
+    if (argc == 5) {
+        width = atoi(argv[3]);
+        height = atoi(argv[4]);
     }
 
-    return image_to_ascii(argv[1], argv[2]);
+    return image_to_ascii(argv[1], argv[2], width, height);
 }
-
