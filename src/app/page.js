@@ -44,21 +44,21 @@ export default function Home() {
   };
 
   return (
-    <main className="container mx-auto p-4 max-w-2xl">
+    <main className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-6 text-center">
         Image to ASCII Art Converter
       </h1>
-      
+
       <form onSubmit={handleSubmit} className="mb-6">
         <div className="flex flex-col items-center">
-          <input 
-            type="file" 
-            accept="image/*" 
-            onChange={handleFileChange} 
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
             className="mb-4 w-full max-w-md"
           />
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={!file || isLoading}
             className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
           >
@@ -68,12 +68,12 @@ export default function Home() {
       </form>
 
       {asciiArt && (
-        <div className="bg-gray-100 p-4 rounded">
+        <div className="bg-black text-white rounded">
           <pre className="overflow-x-auto text-xs whitespace-pre font-mono">
             {asciiArt}
           </pre>
           <div className="flex justify-center mt-4">
-            <button 
+            <button
               onClick={handleCopy}
               className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600"
             >
