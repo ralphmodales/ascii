@@ -11,11 +11,12 @@
 #define MAX_WIDTH 1000
 #define MAX_HEIGHT 1000
 
-int image_to_ascii(const char* input_path, const char* output_path, size_t custom_width, size_t custom_height) {
+int image_to_ascii(const char* input_path, const char* output_text_path, const char* output_png_path, size_t custom_width, size_t custom_height) {
     MagickWand *magick_wand;
     PixelIterator *iterator;
     PixelWand **pixels;
     FILE *output_file;
+    char ascii_art[custom_height][custom_width + 1];
 
     if (custom_width == 0 || custom_height == 0 || 
         custom_width > MAX_WIDTH || custom_height > MAX_HEIGHT) {
@@ -38,9 +39,9 @@ int image_to_ascii(const char* input_path, const char* output_path, size_t custo
 
     MagickSetImageType(magick_wand, GrayscaleType);
 
-    output_file = fopen(output_path, "w");
+    output_file = fopen(output_text_path, "w");
     if (!output_file) {
-        fprintf(stderr, "Error opening output file\n");
+        fprintf(stderr, "Error opening output text file\n");
         return 1;
     }
 
@@ -59,13 +60,41 @@ int image_to_ascii(const char* input_path, const char* output_path, size_t custo
             int char_index = (int)floor(intensity * (strlen(ASCII_CHARS) - 1));
             char ascii_char = ASCII_CHARS[char_index];
             
+            ascii_art[y][x] = ascii_char;
             fputc(ascii_char, output_file);
         }
         
+        ascii_art[y][custom_width] = '\0';
         fputc('\n', output_file);
     }
 
     fclose(output_file);
+
+    MagickWand *png_wand = NewMagickWand();
+    PixelWand *black = NewPixelWand();
+    PixelWand *white = NewPixelWand();
+    DrawingWand *drawing_wand = NewDrawingWand();
+
+    PixelSetColor(black, "black");
+    PixelSetColor(white, "white");
+
+    MagickNewImage(png_wand, custom_width * 8, custom_height * 16, white);
+    DrawSetFillColor(drawing_wand, black);
+    DrawSetFont(drawing_wand, "DejaVu-Sans-Mono");
+    DrawSetFontSize(drawing_wand, 12);
+
+    for (size_t y = 0; y < custom_height; y++) {
+        DrawAnnotation(drawing_wand, 0, (y + 1) * 16, (const unsigned char*)ascii_art[y]);
+    }
+
+    MagickDrawImage(png_wand, drawing_wand);
+    MagickWriteImage(png_wand, output_png_path);
+
+    drawing_wand = DestroyDrawingWand(drawing_wand);
+    png_wand = DestroyMagickWand(png_wand);
+    white = DestroyPixelWand(white);
+    black = DestroyPixelWand(black);
+
     iterator = DestroyPixelIterator(iterator);
     magick_wand = DestroyMagickWand(magick_wand);
     MagickWandTerminus();
@@ -77,10 +106,10 @@ int main(int argc, char *argv[]) {
     size_t width = DEFAULT_WIDTH;
     size_t height = DEFAULT_HEIGHT;
 
-    if (argc == 5) {
+    if (argc == 6) {
         width = atoi(argv[3]);
         height = atoi(argv[4]);
     }
 
-    return image_to_ascii(argv[1], argv[2], width, height);
+    return image_to_ascii(argv[1], argv[2], argv[5], width, height);
 }
