@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Copy, Upload, Wand2, Image } from 'lucide-react';
+import { Copy, Upload, Wand2, Image, Maximize2 } from 'lucide-react';
+import FullAsciiArtModal from './FullAsciiArtModal';
 
 export default function Home() {
   const [file, setFile] = useState(null);
@@ -10,6 +11,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [width, setWidth] = useState(100);
   const [height, setHeight] = useState(100);
+  const [isFullViewOpen, setIsFullViewOpen] = useState(false);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -139,8 +141,15 @@ export default function Home() {
         {asciiArt && (
           <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-[#121212] rounded-xl shadow-2xl overflow-hidden">
-              <div className="p-4 bg-[#121212]">
+              <div className="p-4 bg-[#121212] flex justify-between items-center">
                 <h2 className="text-xl font-semibold text-white">Generated ASCII Art (Text)</h2>
+                <button 
+                  onClick={() => setIsFullViewOpen(true)}
+                  className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition flex items-center"
+                >
+                  <Maximize2 className="mr-2" size={16} />
+                  Full View
+                </button>
               </div>
               <pre
                 className="p-4 text-xs whitespace-pre overflow-x-auto font-mono text-white bg-[#121212] max-h-[600px]"
@@ -174,6 +183,13 @@ export default function Home() {
               </div>
             </div>
           </div>
+        )}
+
+        {isFullViewOpen && (
+          <FullAsciiArtModal 
+            asciiArt={asciiArt} 
+            onClose={() => setIsFullViewOpen(false)} 
+          />
         )}
       </div>
     </div>
