@@ -11,18 +11,53 @@
 #define MAX_WIDTH 1000
 #define MAX_HEIGHT 1000
 
+void generate_ascii_png(const char* output_png_path, char ascii_art[MAX_HEIGHT][MAX_WIDTH + 1], 
+                        size_t width, size_t height, size_t original_width, size_t original_height) {
+    MagickWand *png_wand = NewMagickWand();
+    PixelWand *background = NewPixelWand();
+    PixelWand *text_color = NewPixelWand();
+    DrawingWand *drawing_wand = NewDrawingWand();
+
+    double aspect_ratio = (double)original_width / original_height;
+    size_t png_width = width * 10;
+    size_t png_height = height * 40;
+
+    if (aspect_ratio > 1) {
+        png_height = (size_t)(png_width / aspect_ratio);
+    } else {
+        png_width = (size_t)(png_height * aspect_ratio);
+    }
+
+    PixelSetColor(background, "white");
+    PixelSetColor(text_color, "black");
+
+    MagickNewImage(png_wand, png_width, png_height, background);
+
+    DrawSetFillColor(drawing_wand, text_color);
+    DrawSetFont(drawing_wand, "DejaVu-Sans-Mono");
+    DrawSetFontSize(drawing_wand, 16);
+    DrawSetTextAntialias(drawing_wand, MagickTrue);
+
+    for (size_t y = 0; y < height; y++) {
+        DrawAnnotation(drawing_wand, 0, (y + 1) * 20, 
+                       (const unsigned char*)ascii_art[y]);
+    }
+
+    MagickDrawImage(png_wand, drawing_wand);
+    MagickWriteImage(png_wand, output_png_path);
+
+    drawing_wand = DestroyDrawingWand(drawing_wand);
+    png_wand = DestroyMagickWand(png_wand);
+    background = DestroyPixelWand(background);
+    text_color = DestroyPixelWand(text_color);
+}
+
 int image_to_ascii(const char* input_path, const char* output_text_path, const char* output_png_path, size_t custom_width, size_t custom_height) {
     MagickWand *magick_wand;
     PixelIterator *iterator;
     PixelWand **pixels;
     FILE *output_file;
-    char ascii_art[custom_height][custom_width + 1];
-
-    if (custom_width == 0 || custom_height == 0 || 
-        custom_width > MAX_WIDTH || custom_height > MAX_HEIGHT) {
-        custom_width = DEFAULT_WIDTH;
-        custom_height = DEFAULT_HEIGHT;
-    }
+    char ascii_art[MAX_HEIGHT][MAX_WIDTH + 1];
 
     MagickWandGenesis();
     magick_wand = NewMagickWand();
@@ -32,11 +67,16 @@ int image_to_ascii(const char* input_path, const char* output_text_path, const c
         return 1;
     }
 
-    size_t width = MagickGetImageWidth(magick_wand);
-    size_t height = MagickGetImageHeight(magick_wand);
-    
-    MagickResizeImage(magick_wand, custom_width, custom_height, LanczosFilter, 1.0);
+    size_t original_width = MagickGetImageWidth(magick_wand);
+    size_t original_height = MagickGetImageHeight(magick_wand);
 
+    if (custom_width == 0 || custom_height == 0 || 
+        custom_width > MAX_WIDTH || custom_height > MAX_HEIGHT) {
+        custom_width = DEFAULT_WIDTH;
+        custom_height = DEFAULT_HEIGHT;
+    }
+
+    MagickResizeImage(magick_wand, custom_width, custom_height, LanczosFilter, 1.0);
     MagickSetImageType(magick_wand, GrayscaleType);
 
     output_file = fopen(output_text_path, "w");
@@ -69,31 +109,7 @@ int image_to_ascii(const char* input_path, const char* output_text_path, const c
     }
 
     fclose(output_file);
-
-    MagickWand *png_wand = NewMagickWand();
-    PixelWand *black = NewPixelWand();
-    PixelWand *white = NewPixelWand();
-    DrawingWand *drawing_wand = NewDrawingWand();
-
-    PixelSetColor(black, "black");
-    PixelSetColor(white, "white");
-
-    MagickNewImage(png_wand, custom_width, custom_height, white);
-    DrawSetFillColor(drawing_wand, black);
-    DrawSetFont(drawing_wand, "DejaVu-Sans-Mono");
-    DrawSetFontSize(drawing_wand, 12);
-
-    for (size_t y = 0; y < custom_height; y++) {
-        DrawAnnotation(drawing_wand, 0, (y + 1) * 16, (const unsigned char*)ascii_art[y]);
-    }
-
-    MagickDrawImage(png_wand, drawing_wand);
-    MagickWriteImage(png_wand, output_png_path);
-
-    drawing_wand = DestroyDrawingWand(drawing_wand);
-    png_wand = DestroyMagickWand(png_wand);
-    white = DestroyPixelWand(white);
-    black = DestroyPixelWand(black);
+    generate_ascii_png(output_png_path, ascii_art, custom_width, custom_height, original_width, original_height);
 
     iterator = DestroyPixelIterator(iterator);
     magick_wand = DestroyMagickWand(magick_wand);
